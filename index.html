@@ -3,30 +3,78 @@
 <head>
     <title>Test Auth</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .result {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error { background-color: #ffebee; }
+        .success { background-color: #e8f5e9; }
+    </style>
 </head>
 <body>
     <h1>Telegram Auth Test</h1>
-    <div id="output"></div>
+    
+    <button onclick="testPublicEndpoint()">Test Public Endpoint</button>
+    <button onclick="testProtectedEndpoint()">Test Protected Endpoint</button>
+
+    <h2>Raw Init Data:</h2>
+    <div id="initData" class="result"></div>
+
+    <h2>Public Endpoint Response:</h2>
+    <div id="publicOutput" class="result"></div>
+
+    <h2>Protected Endpoint Response:</h2>
+    <div id="protectedOutput" class="result"></div>
 
     <script>
         const webapp = window.Telegram.WebApp;
-        
-        // Log init data
-        console.log('Init Data:', webapp.initData);
+        const API_URL = 'http://localhost:3000';
         
         // Display init data
-        document.getElementById('output').textContent = webapp.initData;
+        document.getElementById('initData').textContent = webapp.initData;
 
-        // Make request to our test endpoint
-        fetch('http://localhost:3000/test/telegram-auth', {
-            headers: {
-                'telegram-web-app-init-data': webapp.initData
+        // Test public endpoint
+        async function testPublicEndpoint() {
+            try {
+                const response = await fetch(`${API_URL}/test/telegram-auth`, {
+                    headers: {
+                        'telegram-web-app-init-data': webapp.initData
+                    }
+                });
+                const data = await response.json();
+                const output = document.getElementById('publicOutput');
+                output.textContent = JSON.stringify(data, null, 2);
+                output.className = 'result success';
+            } catch (error) {
+                const output = document.getElementById('publicOutput');
+                output.textContent = error.toString();
+                output.className = 'result error';
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('API Response:', data);
-        });
+        }
+
+        // Test protected endpoint
+        async function testProtectedEndpoint() {
+            try {
+                const response = await fetch(`${API_URL}/test/protected`, {
+                    headers: {
+                        'telegram-web-app-init-data': webapp.initData,
+                        'x-chain-id': '609dd4f7-3496-4d37-a213-2658f03780c5' // Replace with actual chain ID
+                    }
+                });
+                const data = await response.json();
+                const output = document.getElementById('protectedOutput');
+                output.textContent = JSON.stringify(data, null, 2);
+                output.className = 'result success';
+            } catch (error) {
+                const output = document.getElementById('protectedOutput');
+                output.textContent = error.toString();
+                output.className = 'result error';
+            }
+        }
     </script>
 </body>
 </html>
