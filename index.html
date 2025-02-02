@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <h1>Telegram Auth Test</h1>
+    <div id="output"></div>
+
+    <script>
+        const webapp = window.Telegram.WebApp;
+        
+        // Log init data
+        console.log('Init Data:', webapp.initData);
+        
+        // Display init data
+        document.getElementById('output').textContent = webapp.initData;
+
+        // Make request to our test endpoint
+        fetch('http://localhost:3000/test/telegram-auth', {
+            headers: {
+                'telegram-web-app-init-data': webapp.initData
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('API Response:', data);
+        });
+    </script>
+</body>
+</html>
